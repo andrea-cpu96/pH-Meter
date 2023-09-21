@@ -1,4 +1,4 @@
-Basic pH meter circuit based on stm32f030cct microcontroller.            
+Basic development board for stm32f030cct microcontroller.            
 How to use：
 
 At editor, open the document via: Top menu - File - Open - EasyEDA... , and select the json file, then open it at the editor, you can save it into a project.
