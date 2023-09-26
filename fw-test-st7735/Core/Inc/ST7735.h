@@ -80,8 +80,10 @@ extern SPI_HandleTypeDef hspi1;
 #define ST7735_GMCTRN1 0xE1
 
 // Color definitions
+#define MAIN_COLOR  006060
 #define	BLACK   0x0000
-#define	BLUE    0x001F
+#define DARK_BLUE    0x001F
+#define	BLUE    0x00FF
 #define	RED     0xF800
 #define	GREEN   0x07E0
 #define CYAN    0x07FF

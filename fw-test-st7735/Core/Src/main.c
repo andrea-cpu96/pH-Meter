@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "ST7735.h"
 #include "GFX_FUNCTIONS.h"
+#include "pH_meter.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,8 +42,7 @@
 
 /* Private variables ---------------------------------------------------------*/
  ADC_HandleTypeDef hadc;
-
-SPI_HandleTypeDef hspi1;
+ SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
 
@@ -96,6 +96,9 @@ int main(void)
 
   ST7735_Init(0);
   fillScreen(BLACK);
+  HAL_Delay(500);
+
+  st7735_hallScreen();
 
   /* USER CODE END 2 */
 
@@ -105,25 +108,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-	  ST7735_SetRotation(0);
-	  ST7735_WriteString(0, 0, "HELLO", Font_11x18, RED,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-	  ST7735_SetRotation(1);
-	  ST7735_WriteString(0, 0, "WORLD", Font_11x18, GREEN,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-	  ST7735_SetRotation(2);
-	  ST7735_WriteString(0, 0, "FROM", Font_11x18, BLUE,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-	  ST7735_SetRotation(3);
-	  ST7735_WriteString(0, 0, "ControllersTech", Font_16x26, YELLOW,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
+	pHMeter_process();
 
     /* USER CODE BEGIN 3 */
   }
@@ -274,11 +259,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, ST7735_AD_Pin|ST7735_RESET_Pin|ST7735_CS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : UP_Pin DOWN_Pin SEL_Pin */
+  GPIO_InitStruct.Pin = UP_Pin|DOWN_Pin|SEL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LEFT_Pin RIGHT_Pin */
+  GPIO_InitStruct.Pin = LEFT_Pin|RIGHT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : ST7735_AD_Pin ST7735_RESET_Pin ST7735_CS_Pin */
   GPIO_InitStruct.Pin = ST7735_AD_Pin|ST7735_RESET_Pin|ST7735_CS_Pin;
@@ -286,6 +285,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : OPAMP_CALIB_Pin */
+  GPIO_InitStruct.Pin = OPAMP_CALIB_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(OPAMP_CALIB_GPIO_Port, &GPIO_InitStruct);
 
 }
 

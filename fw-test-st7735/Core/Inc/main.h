@@ -37,6 +37,9 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+extern ADC_HandleTypeDef hadc;
+extern SPI_HandleTypeDef hspi1;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -57,6 +60,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define UP_Pin GPIO_PIN_13
+#define UP_GPIO_Port GPIOC
+#define DOWN_Pin GPIO_PIN_14
+#define DOWN_GPIO_Port GPIOC
+#define SEL_Pin GPIO_PIN_15
+#define SEL_GPIO_Port GPIOC
+#define LEFT_Pin GPIO_PIN_0
+#define LEFT_GPIO_Port GPIOA
+#define RIGHT_Pin GPIO_PIN_1
+#define RIGHT_GPIO_Port GPIOA
 #define ADC1_IN8_Pin GPIO_PIN_0
 #define ADC1_IN8_GPIO_Port GPIOB
 #define ST7735_AD_Pin GPIO_PIN_1
@@ -65,6 +78,8 @@ void Error_Handler(void);
 #define ST7735_RESET_GPIO_Port GPIOB
 #define ST7735_CS_Pin GPIO_PIN_10
 #define ST7735_CS_GPIO_Port GPIOB
+#define OPAMP_CALIB_Pin GPIO_PIN_12
+#define OPAMP_CALIB_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
