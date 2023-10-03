@@ -8,9 +8,9 @@
 #ifndef INC_PH_METER_H_
 #define INC_PH_METER_H_
 
-#define PH_V_SLOPE			1.0
-#define V_OFFSET			0.0
-#define PH_OFFSET			0.0
+#define PH_V_SLOPE			-15.0
+#define V_OFFSET			1.25
+#define PH_OFFSET			7.0
 
 typedef enum
 {

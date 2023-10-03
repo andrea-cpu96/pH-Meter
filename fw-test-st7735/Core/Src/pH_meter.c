@@ -5,6 +5,7 @@
  *      Author: Fato
  */
 
+#include <stdio.h>
 
 #include "main.h"
 #include "ST7735.h"
@@ -13,6 +14,7 @@
 
 
 
+static void pH_read(void);
 static void pageTitle_graphics(const char *title);
 static void colorBar_graphics(void);
 
@@ -26,6 +28,12 @@ void pHMeter_process(void)
 {
 
 	uint8_t processState;
+	static uint16_t color = GREEN;
+	static uint8_t first = 1;
+
+	pH_read();
+
+	//pH_current = 7.0;
 
 	if(pH_current >= 10.5)
 		processState = STRONG_BASE;
@@ -38,24 +46,106 @@ void pHMeter_process(void)
 	else
 		processState = NEUTRAL;
 
-	switch(processState)
+	if(( first == 1 ) || ( pH_status != processState ))
 	{
 
-		default:
-		case NEUTRAL:
+		switch(processState)
+		{
 
-			fillScreen(GREEN);
-			st7735_mainScreen();
+			default:
+			case NEUTRAL:
 
-		break;
+				pH_status = NEUTRAL;
 
-		case
+				fillScreen(GREEN);
+				st7735_mainScreen();
 
+				color = GREEN;
+
+				break;
+
+			case STRONG_ACID:
+
+				pH_status = STRONG_ACID;
+
+				fillScreen(RED);
+				st7735_mainScreen();
+
+				color = RED;
+
+				break;
+
+			case ACID:
+
+				pH_status = ACID;
+
+				fillScreen(YELLOW);
+				st7735_mainScreen();
+
+				color = YELLOW;
+
+				break;
+
+			case BASE:
+
+				pH_status = BASE;
+
+				fillScreen(BLUE);
+				st7735_mainScreen();
+
+				color = BLUE;
+
+				break;
+
+			case STRONG_BASE:
+
+				pH_status = STRONG_BASE;
+
+				fillScreen(DARK_BLUE);
+				st7735_mainScreen();
+
+				color = DARK_BLUE;
+
+				break;
+
+		}
 
 	}
 
 
+	uint16_t upH = (uint16_t)( pH_current * 100 );
 
+	char pHstring[6];
+
+	if(upH >= 1000)
+	{
+
+		pHstring[5] = 0;
+
+		pHstring[0] = (uint8_t)( upH / 1000 ) + 0x30;
+		pHstring[1] = (uint8_t)( ( upH - ( ( upH / 1000 ) * 1000 ) ) / 100 ) + 0x30;
+		pHstring[2] = '.';
+		pHstring[3] = (uint8_t)( ( upH - ( ( upH / 100 ) * 100 ) ) / 10 ) + 0x30;
+		pHstring[4] = (uint8_t)( upH - ( ( upH / 10 ) * 10 ) ) + 0x30;
+
+	}
+	else
+	{
+
+		pHstring[4] = 0;
+
+		pHstring[0] = (uint8_t)( upH / 100 ) + 0x30;
+		pHstring[1] = '.';
+		pHstring[2] = (uint8_t)( ( upH - ( ( upH / 100 ) * 100 ) ) / 10 ) + 0x30;
+		pHstring[3] = (uint8_t)( upH - ( ( upH / 10 ) * 10 ) ) + 0x30;
+
+	}
+
+	ST7735_SetRotation(1);
+	ST7735_WriteString(40, 50, pHstring, Font_16x26, WHITE, color);
+
+	if(first == 1)
+		first = 0;
 
 }
 
@@ -69,20 +159,20 @@ void pHMeter_process(void)
 void st7735_hallScreen(void)
 {
 
-	  ST7735_SetRotation(0);
-	  ST7735_WriteString(0, 0, "UnNatural eng. presents", Font_11x18, WHITE,BLACK);
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(0, 0, "UnNatural presents", Font_7x10, WHITE,BLACK);
 	  HAL_Delay(1000);
 	  fillScreen(BLACK);
 
-	  ST7735_SetRotation(0);
-	  ST7735_WriteString(0, 0, "pH-METER V0", Font_16x26, GREEN,BLACK);
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(20, 50, "pH-METER V0", Font_11x18, GREEN,BLACK);
 	  HAL_Delay(1000);
 	  fillScreen(BLACK);
 
-	  ST7735_SetRotation(0);
-	  ST7735_WriteString(0, 0, "A product developed by", Font_11x18, WHITE,BLACK);
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(0, 0, "A product developed by", Font_7x10, WHITE,BLACK);
 	  HAL_Delay(1000);
-	  ST7735_WriteString(0, 20, "Andrea Fato eng.", Font_11x18, WHITE,BLACK);
+	  ST7735_WriteString(20, 50, "Eng. Andrea", Font_11x18, GREEN,BLACK);
 	  HAL_Delay(1000);
 	  fillScreen(BLACK);
 
@@ -117,15 +207,37 @@ static void pH_read(void)
 
 	uint32_t rawAdcData;
 	float rawAdcmV;
-	float pHValue;
+	float pHValue = 0.0;
+
+	static float buff[6] = {0};
+	static uint32_t count = 0;
 
 	rawAdcData = HAL_ADC_GetValue(&hadc);
 
-	rawAdcmV = ( rawAdcData * ( 5000.0 / 4096.0 ) );
+	rawAdcmV = ( rawAdcData * ( 3.3 / 4096.0 ) );
 
-	pHValue = ( ( PH_V_SLOPE * ( rawAdcmV - V_OFFSET ) ) + PH_OFFSET );
+	buff[count%10] = ( ( PH_V_SLOPE * ( rawAdcmV - V_OFFSET ) ) + PH_OFFSET );
+
+	pHValue = buff[count];
+
+	count++;
+
+	if(count > 9)
+	{
+
+		pHValue = 0.0;
+		for(int i = 0 ; i < 10 ; i++)
+			pHValue += buff[i];
+
+		pHValue = ( pHValue / 10 );
+
+	}
 
 	pH_current = pHValue;
+
+	HAL_ADC_Start(&hadc);
+
+
 
 
 }
@@ -140,16 +252,13 @@ static void pageTitle_graphics(const char *title)
 	 *	  \-----------------------/
 	 */
 
-	drawLine(49, 0, 109, 0, MAIN_COLOR);
-	drawLine(49, 0, 69, 20, MAIN_COLOR);
-	drawLine(69, 20, 89, 20, MAIN_COLOR);
-	drawLine(89, 20, 109, 0, MAIN_COLOR);
+	ST7735_SetRotation(1);
 
-	fillTriangle(49, 0, 69, 0, 69, 20, MAIN_COLOR);
-	fillTriangle(89, 0, 109, 0, 89, 20, MAIN_COLOR);
-    fillRect(49, 20, 60, 20, MAIN_COLOR);
+	fillTriangle(30, 0, 50, 0, 50, 20, MAIN_COLOR);
+	fillTriangle(110, 0, 130, 0, 110, 20, MAIN_COLOR);
+    fillRect(50, 0, 60, 21, MAIN_COLOR);
 
-    ST7735_WriteString(59, 5, title, Font_11x18, WHITE, MAIN_COLOR);
+    ST7735_WriteString(45, 3, title, Font_7x10, WHITE, MAIN_COLOR);
 
 }
 
@@ -168,11 +277,22 @@ static void colorBar_graphics(void)
 	 *
 	 */
 
-	drawRoundRect(40, 110, 40, 20, 5, DARK_BLUE);
-	drawRoundRect(60, 110, 40, 20, 5, BLUE);
-	drawRoundRect(80, 110, 40, 20, 5, GREEN);
-	drawRoundRect(100, 110, 40, 20, 5, YELLOW);
-	drawRoundRect(120, 110, 40, 20, 5, RED);
+	ST7735_SetRotation(1);
+
+	uint8_t x = 120;
+	uint8_t y = 100;
+
+	drawRect(x, y-80, 40, 20, BLACK);
+	drawRect(x, y-60, 40, 20, BLACK);
+	drawRect(x, y-40, 40, 20, BLACK);
+	drawRect(x, y-20, 40, 20, BLACK);
+	drawRect(x, y, 40, 20, BLACK);
+
+	fillRect(x+1, y-80, 39, 19, DARK_BLUE);
+	fillRect(x+1, y-60, 39, 19, BLUE);
+	fillRect(x+1, y-40, 39, 19, GREEN);
+	fillRect(x+1, y-20, 39, 19, YELLOW);
+	fillRect(x+1, y, 39, 19, RED);
 
 }
 

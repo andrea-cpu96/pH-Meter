@@ -94,6 +94,8 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_ADC_Start(&hadc);
+
   ST7735_Init(0);
   fillScreen(BLACK);
   HAL_Delay(500);
@@ -107,6 +109,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+	HAL_Delay(1000);
 
 	pHMeter_process();
 
