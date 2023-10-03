@@ -1,6 +1,10 @@
-../Core/Src/pH_meter.c:27:6:pHMeter_process	48	static
-../Core/Src/pH_meter.c:159:6:st7735_hallScreen	24	static
-../Core/Src/pH_meter.c:185:6:st7735_mainScreen	8	static
-../Core/Src/pH_meter.c:205:13:pH_read	40	static
-../Core/Src/pH_meter.c:246:13:pageTitle_graphics	32	static
-../Core/Src/pH_meter.c:265:13:colorBar_graphics	24	static
+../Core/Src/pH_meter.c:39:6:pHMeter_process	24	static
+../Core/Src/pH_meter.c:86:6:pH_read	40	static
+../Core/Src/pH_meter.c:134:6:idlePage	24	static
+../Core/Src/pH_meter.c:157:6:mainPage	48	static
+../Core/Src/pH_meter.c:240:6:circuitCalibPage	8	static
+../Core/Src/pH_meter.c:256:16:processStatus_update	8	static
+../Core/Src/pH_meter.c:285:13:pHStatus_update	8	static
+../Core/Src/pH_meter.c:302:13:mainPage_graphics	8	static
+../Core/Src/pH_meter.c:314:13:pageTitle_graphics	32	static
+../Core/Src/pH_meter.c:333:13:colorBar_graphics	24	static

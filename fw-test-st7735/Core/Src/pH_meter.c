@@ -8,141 +8,69 @@
 #include <stdio.h>
 
 #include "main.h"
+
+#include "user_sysfunc.h"
 #include "ST7735.h"
 #include "GFX_FUNCTIONS.h"
 #include "pH_meter.h"
 
 
+static uint8_t processStatus_update(void);
+static void pHStatus_update(void);
 
-static void pH_read(void);
 static void pageTitle_graphics(const char *title);
+static void mainPage_graphics(void);
 static void colorBar_graphics(void);
 
+
+uint8_t first = 1;
+uint32_t pHTimeStamp = 0;
 float pH_current = 7.0;
-uint8_t pH_status = NEUTRAL;
+PROCESS_STATUS process_status = MAIN_PROCESS;
+PH_STATUS pH_status = NEUTRAL;
 
 
 /************** pH **************/
 
+/*
+ *  @ Function; pHMeter_process()
+ *  @ Description; handles the screen views
+ */
 void pHMeter_process(void)
 {
 
-	uint8_t processState;
-	static uint16_t color = GREEN;
-	static uint8_t first = 1;
+	uint8_t pageChanged = 0;
 
+	if(first)
+		idlePage();
+
+	// Get a new pH value
 	pH_read();
 
-	//pH_current = 7.0;
+    // New pH status evaluation
+	pHStatus_update();
 
-	if(pH_current >= 10.5)
-		processState = STRONG_BASE;
-	else if(( pH_current > 8.5 ) && ( pH_current < 10.5 ))
-		processState = BASE;
-	else if(( pH_current > 3.5 ) && ( pH_current < 5.5 ))
-		processState = ACID;
-	else if(pH_current <= 3.5)
-		processState = STRONG_ACID;
-	else
-		processState = NEUTRAL;
+	// New process status evaluation
+	pageChanged = processStatus_update();
 
-	if(( first == 1 ) || ( pH_status != processState ))
+	switch(process_status)
 	{
 
-		switch(processState)
-		{
+		default:
+		case MAIN_PROCESS:
 
-			default:
-			case NEUTRAL:
+			mainPage(pageChanged);
 
-				pH_status = NEUTRAL;
+			break;
 
-				fillScreen(GREEN);
-				st7735_mainScreen();
+		case CIRCUIT_CALIBRATION:
 
-				color = GREEN;
+			circuitCalibPage();
 
-				break;
-
-			case STRONG_ACID:
-
-				pH_status = STRONG_ACID;
-
-				fillScreen(RED);
-				st7735_mainScreen();
-
-				color = RED;
-
-				break;
-
-			case ACID:
-
-				pH_status = ACID;
-
-				fillScreen(YELLOW);
-				st7735_mainScreen();
-
-				color = YELLOW;
-
-				break;
-
-			case BASE:
-
-				pH_status = BASE;
-
-				fillScreen(BLUE);
-				st7735_mainScreen();
-
-				color = BLUE;
-
-				break;
-
-			case STRONG_BASE:
-
-				pH_status = STRONG_BASE;
-
-				fillScreen(DARK_BLUE);
-				st7735_mainScreen();
-
-				color = DARK_BLUE;
-
-				break;
-
-		}
+			break;
 
 	}
 
-
-	uint16_t upH = (uint16_t)( pH_current * 100 );
-
-	char pHstring[6];
-
-	if(upH >= 1000)
-	{
-
-		pHstring[5] = 0;
-
-		pHstring[0] = (uint8_t)( upH / 1000 ) + 0x30;
-		pHstring[1] = (uint8_t)( ( upH - ( ( upH / 1000 ) * 1000 ) ) / 100 ) + 0x30;
-		pHstring[2] = '.';
-		pHstring[3] = (uint8_t)( ( upH - ( ( upH / 100 ) * 100 ) ) / 10 ) + 0x30;
-		pHstring[4] = (uint8_t)( upH - ( ( upH / 10 ) * 10 ) ) + 0x30;
-
-	}
-	else
-	{
-
-		pHstring[4] = 0;
-
-		pHstring[0] = (uint8_t)( upH / 100 ) + 0x30;
-		pHstring[1] = '.';
-		pHstring[2] = (uint8_t)( ( upH - ( ( upH / 100 ) * 100 ) ) / 10 ) + 0x30;
-		pHstring[3] = (uint8_t)( upH - ( ( upH / 10 ) * 10 ) ) + 0x30;
-
-	}
-
-	ST7735_SetRotation(1);
-	ST7735_WriteString(40, 50, pHstring, Font_16x26, WHITE, color);
 
 	if(first == 1)
 		first = 0;
@@ -150,59 +78,12 @@ void pHMeter_process(void)
 }
 
 
-/*********** DISPLAY ************/
-
 /*
- * 	@ Function: st7735_hallScreen
- * 	@ Description: Presentation screen
+ *  @ Function; pH_read()
+ *  @ Description; read a new pH value from the probe
+ *  @ every PH_PROCESS_DELAY seconds
  */
-void st7735_hallScreen(void)
-{
-
-	  ST7735_SetRotation(1);
-	  ST7735_WriteString(0, 0, "UnNatural presents", Font_7x10, WHITE,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-	  ST7735_SetRotation(1);
-	  ST7735_WriteString(20, 50, "pH-METER V0", Font_11x18, GREEN,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-	  ST7735_SetRotation(1);
-	  ST7735_WriteString(0, 0, "A product developed by", Font_7x10, WHITE,BLACK);
-	  HAL_Delay(1000);
-	  ST7735_WriteString(20, 50, "Eng. Andrea", Font_11x18, GREEN,BLACK);
-	  HAL_Delay(1000);
-	  fillScreen(BLACK);
-
-}
-
-/*
- * 	@ Function: st7735_mainScreen
- * 	@ Description: Presentation main screen for current pH measure
- */
-void st7735_mainScreen(void)
-{
-
-	// 1. Title
-	pageTitle_graphics("Current pH");
-
-	// 2. Color scale
-	colorBar_graphics();
-
-}
-
-/********************************/
-
-
-
-
-
-/**************** PRIVATE FUNCTIONS ******************/
-
-
-static void pH_read(void)
+void pH_read(void)
 {
 
 	uint32_t rawAdcData;
@@ -211,6 +92,11 @@ static void pH_read(void)
 
 	static float buff[6] = {0};
 	static uint32_t count = 0;
+
+	if(getDelayMs(pHTimeStamp) < PH_PROCESS_DELAY)
+		return;
+
+	pHTimeStamp = getTimeMs();
 
 	rawAdcData = HAL_ADC_GetValue(&hadc);
 
@@ -237,8 +123,190 @@ static void pH_read(void)
 
 	HAL_ADC_Start(&hadc);
 
+}
+
+/*********** DISPLAY ************/
+
+/*
+ * 	@ Function: st7735_hallScreen
+ * 	@ Description: Presentation screen
+ */
+void idlePage(void)
+{
+
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(0, 0, "UnNatural presents", Font_7x10, WHITE,BLACK);
+	  HAL_Delay(1000);
+	  fillScreen(BLACK);
+
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(20, 50, "pH-METER V0", Font_11x18, GREEN,BLACK);
+	  HAL_Delay(1000);
+	  fillScreen(BLACK);
+
+	  ST7735_SetRotation(1);
+	  ST7735_WriteString(0, 0, "A product developed by", Font_7x10, WHITE,BLACK);
+	  HAL_Delay(1000);
+	  ST7735_WriteString(20, 50, "Eng. Andrea", Font_11x18, GREEN,BLACK);
+	  HAL_Delay(1000);
+	  fillScreen(BLACK);
+
+}
 
 
+void mainPage(uint8_t updatePage)
+{
+
+	static PH_STATUS main_pH_status = IDLE;
+	static uint16_t mainColor = GREEN;
+
+
+	if( ( updatePage == 1 ) || ( pH_status != main_pH_status ) )
+	{
+
+		switch(pH_status)
+		{
+
+			default:
+			case NEUTRAL:
+
+				main_pH_status = NEUTRAL;
+
+				fillScreen(GREEN);
+				mainPage_graphics();
+
+				mainColor = GREEN;
+
+				break;
+
+			case STRONG_ACID:
+
+				main_pH_status = STRONG_ACID;
+
+				fillScreen(RED);
+				mainPage_graphics();
+
+				mainColor = RED;
+
+				break;
+
+			case ACID:
+
+				main_pH_status = ACID;
+
+				fillScreen(YELLOW);
+				mainPage_graphics();
+
+				mainColor = YELLOW;
+
+				break;
+
+			case BASE:
+
+				main_pH_status = BASE;
+
+				fillScreen(BLUE);
+				mainPage_graphics();
+
+				mainColor = BLUE;
+
+				break;
+
+			case STRONG_BASE:
+
+				main_pH_status = STRONG_BASE;
+
+				fillScreen(DARK_BLUE);
+				mainPage_graphics();
+
+				mainColor = DARK_BLUE;
+
+				break;
+
+		}
+
+	}
+
+	char pHstring[6];
+
+	floatToString(pH_current, pHstring);
+
+	ST7735_SetRotation(1);
+	ST7735_WriteString(40, 50, pHstring, Font_16x26, WHITE, mainColor);
+
+}
+
+
+void circuitCalibPage(void)
+{
+
+	fillScreen(BLACK);
+
+
+}
+
+/********************************/
+
+
+
+
+
+/**************** PRIVATE FUNCTIONS ******************/
+
+static uint8_t processStatus_update(void)
+{
+
+	static PROCESS_STATUS local_process_status = IDLE_PROCESS;
+
+
+	if(HAL_GPIO_ReadPin(OPAMP_CALIB_GPIO_Port, OPAMP_CALIB_Pin) == 0)
+		process_status = CIRCUIT_CALIBRATION;
+	else
+		process_status = MAIN_PROCESS;
+
+	if(local_process_status != process_status)
+	{
+
+		local_process_status = process_status;
+		return 1;
+
+	}
+	else
+	{
+
+		local_process_status = process_status;
+		return 0;
+
+	}
+
+}
+
+
+static void pHStatus_update(void)
+{
+
+	if(pH_current >= 10.5)
+		pH_status = STRONG_BASE;
+	else if(( pH_current > 8.5 ) && ( pH_current < 10.5 ))
+		pH_status = BASE;
+	else if(( pH_current > 3.5 ) && ( pH_current < 5.5 ))
+		pH_status = ACID;
+	else if(pH_current <= 3.5)
+		pH_status = STRONG_ACID;
+	else
+		pH_status = NEUTRAL;
+
+}
+
+
+static void mainPage_graphics(void)
+{
+
+	// 1. Title
+	pageTitle_graphics("Current pH");
+
+	// 2. Color scale
+	colorBar_graphics();
 
 }
 
@@ -295,5 +363,7 @@ static void colorBar_graphics(void)
 	fillRect(x+1, y, 39, 19, RED);
 
 }
+
+
 
 /*****************************************************/

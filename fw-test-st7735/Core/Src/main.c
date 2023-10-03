@@ -45,7 +45,6 @@
  SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,8 +99,6 @@ int main(void)
   fillScreen(BLACK);
   HAL_Delay(500);
 
-  st7735_hallScreen();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,8 +106,6 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
-	HAL_Delay(1000);
 
 	pHMeter_process();
 
@@ -293,7 +288,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : OPAMP_CALIB_Pin */
   GPIO_InitStruct.Pin = OPAMP_CALIB_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(OPAMP_CALIB_GPIO_Port, &GPIO_InitStruct);
 
 }
