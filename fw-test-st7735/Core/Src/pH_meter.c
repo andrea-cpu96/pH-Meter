@@ -252,10 +252,14 @@ void mainPage(uint8_t updatePage)
 void circuitCalibPage(uint8_t updatePage)
 {
 
+	static float hLineBuff[6] = {0};
+	static uint32_t hLineCount = 0;
+	static uint32_t hLine_old = 128;
+
 	uint16_t indicatorsColor = RED;
 
-	uint16_t rawAdcData = 0;
-	uint8_t hLine = 0;
+	uint16_t rawAdcData = 128;
+	uint32_t hLine = 128;
 	float rawAdcmV = 0.0;
 
 
@@ -273,15 +277,36 @@ void circuitCalibPage(uint8_t updatePage)
 
 	rawAdcData = HAL_ADC_GetValue(&hadc);
 	rawAdcmV = ( rawAdcData * ( 3.3 / 4096.0 ) );
-	hLine = ( rawAdcmV * 38.79); // ( 128 pixels / 3.3 V ) = 38.79
+	hLineBuff[hLineCount%6] = 128.0 - ( rawAdcmV * 32.72); // ( 128 pixels / 3.3 V ) = 38.79
+
+	hLine = hLineBuff[hLineCount%6];
+
+	hLineCount++;
+
+	if(hLineCount >= 6)
+	{
+
+		hLine = 0.0;
+		for(int i = 0 ; i < 6 ; i++)
+			hLine += hLineBuff[i];
+
+		hLine = ( hLine / 6.0 );
+
+	}
+
 
 	HAL_ADC_Start(&hadc);
 
 	// Draw a line indicator
 
+	if( (uint8_t)(hLine_old*100) != (uint8_t)(hLine*100) )
+		drawLine(0, hLine_old, 160, hLine_old, BLACK);
+
 	drawLine(0, hLine, 160, hLine, WHITE);
 
-	if(( hLine >= ( 64 - 3 ) ) && ( hLine <= ( 64 + 3 ) ))
+	hLine_old = hLine;
+
+	if(( hLine >= ( 128 - 54 - 1 ) ) && ( hLine <= ( 128 - 54 + 1 ) ))
 		indicatorsColor = GREEN;
 	else
 		indicatorsColor = RED;
@@ -360,7 +385,7 @@ static void circuitCalibPage_graphics(void)
 {
 
 	// 1. Title
-	pageTitle_graphics("Circuit calibration", CIRCUIT_CALIBRATION_PAGE);
+	pageTitle_graphics("Circuit calibra.", CIRCUIT_CALIBRATION_PAGE);
 
 	// 2. Offset indicators
 	orizzIndicators_graphics(RED);
@@ -392,7 +417,7 @@ static void pageTitle_graphics(const char *title, uint8_t page)
 
 	fillTriangle(30-offset, 0, 50-offset, 0, 50-offset, 20, MAIN_COLOR);
 	fillTriangle(110+offset, 0, 130+offset, 0, 110+offset, 20, MAIN_COLOR);
-    fillRect(50-offset, 0, 60+offset, 21, MAIN_COLOR);
+    fillRect(50-offset, 0, 60+(2*offset), 21, MAIN_COLOR);
 
     ST7735_WriteString(45-offset, 3, title, Font_7x10, WHITE, MAIN_COLOR);
 
@@ -446,8 +471,8 @@ static void orizzIndicators_graphics(uint16_t color)
 	 */
 
 
-	fillTriangle(0, 44, 20, 64, 84, 0, color);
-	fillTriangle(160, 44, 140, 64, 84, 160, color);
+	fillTriangle(0, 128-34, 20, 128-54, 0, 128-74, color);
+	fillTriangle(160, 128-34, 140, 128-54, 160, 128-74, color);
 
 
 }
