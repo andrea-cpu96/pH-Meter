@@ -71,7 +71,8 @@ void floatToString(float f, char *s)
 	else
 	{
 
-		s[4] = 0;
+		s[5] = 0;
+		s[4] = ' ';
 
 		s[0] = (uint8_t)( ui16Temp / 100 ) + 0x30;
 		s[1] = '.';

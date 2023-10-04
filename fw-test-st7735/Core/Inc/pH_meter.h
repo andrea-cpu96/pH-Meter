@@ -8,11 +8,19 @@
 #ifndef INC_PH_METER_H_
 #define INC_PH_METER_H_
 
-#define PH_PROCESS_DELAY	1000  // 1 sec
+#define PH_PROCESS_DELAY						1000  // 1 sec
 
-#define PH_V_SLOPE			-15.0
-#define V_OFFSET			1.25
-#define PH_OFFSET			7.0
+#define STRONG_BASE_THR							10.5
+#define BASE_THR							    8.5
+#define ACID_THR								5.5
+#define STRONG_ACID_THR							3.5
+
+#define PH_V_SLOPE								-15.0
+#define V_OFFSET								1.25
+#define PH_OFFSET								7.0
+
+#define MAIN_PAGE								10
+#define CIRCUIT_CALIBRATION_PAGE				20
 
 typedef enum
 {
@@ -48,7 +56,7 @@ void pH_read(void);
 
 void idlePage(void);
 void mainPage(uint8_t updatePage);
-void circuitCalibPage(void);
+void circuitCalibPage(uint8_t updatePage);
 
 /********************************/
 

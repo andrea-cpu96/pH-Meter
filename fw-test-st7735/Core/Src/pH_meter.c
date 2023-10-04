@@ -18,9 +18,11 @@
 static uint8_t processStatus_update(void);
 static void pHStatus_update(void);
 
-static void pageTitle_graphics(const char *title);
+static void pageTitle_graphics(const char *title, uint8_t page);
 static void mainPage_graphics(void);
+static void circuitCalibPage_graphics(void);
 static void colorBar_graphics(void);
+static void orizzIndicators_graphics(uint16_t color);
 
 
 uint8_t first = 1;
@@ -65,7 +67,7 @@ void pHMeter_process(void)
 
 		case CIRCUIT_CALIBRATION:
 
-			circuitCalibPage();
+			circuitCalibPage(pageChanged);
 
 			break;
 
@@ -102,20 +104,20 @@ void pH_read(void)
 
 	rawAdcmV = ( rawAdcData * ( 3.3 / 4096.0 ) );
 
-	buff[count%10] = ( ( PH_V_SLOPE * ( rawAdcmV - V_OFFSET ) ) + PH_OFFSET );
+	buff[count%6] = ( ( PH_V_SLOPE * ( rawAdcmV - V_OFFSET ) ) + PH_OFFSET );
 
-	pHValue = buff[count];
+	pHValue = buff[count%6];
 
 	count++;
 
-	if(count > 9)
+	if(count >= 6)
 	{
 
 		pHValue = 0.0;
-		for(int i = 0 ; i < 10 ; i++)
+		for(int i = 0 ; i < 6 ; i++)
 			pHValue += buff[i];
 
-		pHValue = ( pHValue / 10 );
+		pHValue = ( pHValue / 6.0 );
 
 	}
 
@@ -154,6 +156,11 @@ void idlePage(void)
 }
 
 
+/*
+ *  @ Function; mainPage
+ *  @ Description; This is the main page where the current
+ *  @ value of pH is shown
+ */
 void mainPage(uint8_t updatePage)
 {
 
@@ -237,11 +244,49 @@ void mainPage(uint8_t updatePage)
 }
 
 
-void circuitCalibPage(void)
+/*
+ *  @ Function; circuitCalibPage
+ *  @ Description; When user push left button, this page
+ *  @ indicates the OPAMP calibration
+ */
+void circuitCalibPage(uint8_t updatePage)
 {
 
-	fillScreen(BLACK);
+	uint16_t indicatorsColor = RED;
 
+	uint16_t rawAdcData = 0;
+	uint8_t hLine = 0;
+	float rawAdcmV = 0.0;
+
+
+	if(updatePage == 1)
+	{
+
+		fillScreen(BLACK);
+		circuitCalibPage_graphics();
+
+		HAL_ADC_Start(&hadc);
+
+		return;
+
+	}
+
+	rawAdcData = HAL_ADC_GetValue(&hadc);
+	rawAdcmV = ( rawAdcData * ( 3.3 / 4096.0 ) );
+	hLine = ( rawAdcmV * 38.79); // ( 128 pixels / 3.3 V ) = 38.79
+
+	HAL_ADC_Start(&hadc);
+
+	// Draw a line indicator
+
+	drawLine(0, hLine, 160, hLine, WHITE);
+
+	if(( hLine >= ( 64 - 3 ) ) && ( hLine <= ( 64 + 3 ) ))
+		indicatorsColor = GREEN;
+	else
+		indicatorsColor = RED;
+
+	orizzIndicators_graphics(indicatorsColor);
 
 }
 
@@ -285,13 +330,13 @@ static uint8_t processStatus_update(void)
 static void pHStatus_update(void)
 {
 
-	if(pH_current >= 10.5)
+	if(pH_current >= STRONG_BASE_THR)
 		pH_status = STRONG_BASE;
-	else if(( pH_current > 8.5 ) && ( pH_current < 10.5 ))
+	else if(( pH_current > BASE_THR ) && ( pH_current < STRONG_BASE_THR ))
 		pH_status = BASE;
-	else if(( pH_current > 3.5 ) && ( pH_current < 5.5 ))
+	else if(( pH_current > STRONG_ACID_THR ) && ( pH_current < ACID_THR ))
 		pH_status = ACID;
-	else if(pH_current <= 3.5)
+	else if(pH_current <= STRONG_ACID_THR)
 		pH_status = STRONG_ACID;
 	else
 		pH_status = NEUTRAL;
@@ -303,7 +348,7 @@ static void mainPage_graphics(void)
 {
 
 	// 1. Title
-	pageTitle_graphics("Current pH");
+	pageTitle_graphics("Current pH", MAIN_PAGE);
 
 	// 2. Color scale
 	colorBar_graphics();
@@ -311,7 +356,19 @@ static void mainPage_graphics(void)
 }
 
 
-static void pageTitle_graphics(const char *title)
+static void circuitCalibPage_graphics(void)
+{
+
+	// 1. Title
+	pageTitle_graphics("Circuit calibration", CIRCUIT_CALIBRATION_PAGE);
+
+	// 2. Offset indicators
+	orizzIndicators_graphics(RED);
+
+}
+
+
+static void pageTitle_graphics(const char *title, uint8_t page)
 {
 
 	/*
@@ -320,13 +377,24 @@ static void pageTitle_graphics(const char *title)
 	 *	  \-----------------------/
 	 */
 
+
+	uint8_t offset = 0;
+
+
+	if(page == MAIN_PAGE)
+		offset = 0;
+	else if(page == CIRCUIT_CALIBRATION_PAGE)
+		offset = 20;
+	else
+		offset = 0;
+
 	ST7735_SetRotation(1);
 
-	fillTriangle(30, 0, 50, 0, 50, 20, MAIN_COLOR);
-	fillTriangle(110, 0, 130, 0, 110, 20, MAIN_COLOR);
-    fillRect(50, 0, 60, 21, MAIN_COLOR);
+	fillTriangle(30-offset, 0, 50-offset, 0, 50-offset, 20, MAIN_COLOR);
+	fillTriangle(110+offset, 0, 130+offset, 0, 110+offset, 20, MAIN_COLOR);
+    fillRect(50-offset, 0, 60+offset, 21, MAIN_COLOR);
 
-    ST7735_WriteString(45, 3, title, Font_7x10, WHITE, MAIN_COLOR);
+    ST7735_WriteString(45-offset, 3, title, Font_7x10, WHITE, MAIN_COLOR);
 
 }
 
@@ -344,6 +412,7 @@ static void colorBar_graphics(void)
 	 * |________|	0
 	 *
 	 */
+
 
 	ST7735_SetRotation(1);
 
@@ -364,6 +433,23 @@ static void colorBar_graphics(void)
 
 }
 
+static void orizzIndicators_graphics(uint16_t color)
+{
 
+	/*
+	 *
+	 * |\                              /|
+	 * | \                            / |
+	 * | /                            \ |
+	 * |/                              \|
+	 *
+	 */
+
+
+	fillTriangle(0, 44, 20, 64, 84, 0, color);
+	fillTriangle(160, 44, 140, 64, 84, 160, color);
+
+
+}
 
 /*****************************************************/
