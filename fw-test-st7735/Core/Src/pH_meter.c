@@ -21,11 +21,15 @@ static void pHStatus_update(void);
 static void pageTitle_graphics(const char *title, uint8_t page);
 static void mainPage_graphics(void);
 static void circuitCalibPage_graphics(void);
+static void softwareCalibPage_graphics(void);
 static void colorBar_graphics(void);
 static void orizzIndicators_graphics(uint16_t color);
 
 
 uint8_t first = 1;
+
+BTN swCalib_btn[3];
+
 uint32_t pHTimeStamp = 0;
 float pH_current = 7.0;
 PROCESS_STATUS process_status = MAIN_PROCESS;
@@ -294,7 +298,6 @@ void circuitCalibPage(uint8_t updatePage)
 
 	}
 
-
 	HAL_ADC_Start(&hadc);
 
 	// Draw a line indicator
@@ -314,6 +317,31 @@ void circuitCalibPage(uint8_t updatePage)
 	orizzIndicators_graphics(indicatorsColor);
 
 }
+
+
+/*
+ *  @ Function; softwareCalibPage
+ *  @ Description; user reach this page from
+ *  @ the main page. Here it is performed the
+ *  @ two points probe calibration
+ */
+static void softwareCalibPage(uint8_t updatePage)
+{
+
+
+	if(updatePage == 1)
+	{
+
+		fillScreen(BLACK);
+		softwareCalibPage_graphics();
+
+		return;
+
+	}
+
+}
+
+
 
 /********************************/
 
@@ -385,13 +413,36 @@ static void circuitCalibPage_graphics(void)
 {
 
 	// 1. Title
-	pageTitle_graphics("Circuit calibra.", CIRCUIT_CALIBRATION_PAGE);
+	pageTitle_graphics("HW calibration", CIRCUIT_CALIBRATION_PAGE);
 
 	// 2. Offset indicators
 	orizzIndicators_graphics(RED);
 
 }
 
+
+static void softwareCalibPage_graphics(void)
+{
+
+	// 1. Title
+	pageTitle_graphics("SW calibration", SOFTWARE_CALIBRATION_PAGE);
+
+	// 2. Timer
+	char sTimer[] = {'3', '0'};
+	ST7735_WriteString(30, 54, "Timer", Font_11x18, WHITE, BLACK);
+	ST7735_WriteString(30, 64, sTimer, Font_11x18, WHITE, BLACK);
+
+	// 3. Point number
+	ST7735_WriteString(50, 64, "PT. 1", Font_11x18, WHITE, BLACK);
+
+	// 4. pH buffer
+	editNumBox(PH_BUFFER_TEXT_POSX, PH_BUFFER_TEXT_POSY, "pH buffer", 7);
+
+	// 5. Buttons
+	swCalib_btn[0] = createButton(PH_BUFFER_START_BTN_POSX, PH_BUFFER_START_BTN_POSY, "START", GRAY);
+	swCalib_btn[1] = createButton(PH_BUFFER_STOP_BTN_POSX, PH_BUFFER_STOP_BTN_POSY, "STOP", GRAY);
+
+}
 
 static void pageTitle_graphics(const char *title, uint8_t page)
 {
@@ -409,6 +460,8 @@ static void pageTitle_graphics(const char *title, uint8_t page)
 	if(page == MAIN_PAGE)
 		offset = 0;
 	else if(page == CIRCUIT_CALIBRATION_PAGE)
+		offset = 20;
+	else if(page == SOFTWARE_CALIBRATION_PAGE)
 		offset = 20;
 	else
 		offset = 0;
@@ -476,5 +529,6 @@ static void orizzIndicators_graphics(uint16_t color)
 
 
 }
+
 
 /*****************************************************/

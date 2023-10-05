@@ -8,6 +8,8 @@
 #ifndef INC_PH_METER_H_
 #define INC_PH_METER_H_
 
+#include "graphicElements.h"
+
 #define PH_PROCESS_DELAY						1000  // 1 sec
 
 #define STRONG_BASE_THR							10.5
@@ -21,6 +23,14 @@
 
 #define MAIN_PAGE								10
 #define CIRCUIT_CALIBRATION_PAGE				20
+#define SOFTWARE_CALIBRATION_PAGE				30
+
+#define PH_BUFFER_TEXT_POSX						95
+#define PH_BUFFER_TEXT_POSY						44
+#define PH_BUFFER_START_BTN_POSX				PH_BUFFER_TEXT_POSX
+#define PH_BUFFER_START_BTN_POSY    			( PH_BUFFER_TEXT_POSY + 45 )
+#define PH_BUFFER_STOP_BTN_POSX					( PH_BUFFER_START_BTN_POSX + 120 )
+#define PH_BUFFER_STOP_BTN_POSY    				PH_BUFFER_START_BTN_POSY
 
 typedef enum
 {
@@ -46,6 +56,8 @@ typedef enum
 
 }PH_STATUS;
 
+
+extern BTN swCalib_btn[3];
 
 /************** pH ***************/
 
