@@ -25,12 +25,12 @@
 #define CIRCUIT_CALIBRATION_PAGE				20
 #define SOFTWARE_CALIBRATION_PAGE				30
 
-#define PH_BUFFER_TEXT_POSX						95
-#define PH_BUFFER_TEXT_POSY						44
+#define PH_BUFFER_TEXT_POSX						80
+#define PH_BUFFER_TEXT_POSY						35
 #define PH_BUFFER_START_BTN_POSX				PH_BUFFER_TEXT_POSX
 #define PH_BUFFER_START_BTN_POSY    			( PH_BUFFER_TEXT_POSY + 45 )
-#define PH_BUFFER_STOP_BTN_POSX					( PH_BUFFER_START_BTN_POSX + 120 )
-#define PH_BUFFER_STOP_BTN_POSY    				PH_BUFFER_START_BTN_POSY
+//#define PH_BUFFER_STOP_BTN_POSX					( PH_BUFFER_START_BTN_POSX + 120 )
+//#define PH_BUFFER_STOP_BTN_POSY    				PH_BUFFER_START_BTN_POSY
 
 typedef enum
 {
@@ -69,6 +69,7 @@ void pH_read(void);
 void idlePage(void);
 void mainPage(uint8_t updatePage);
 void circuitCalibPage(uint8_t updatePage);
+void softwareCalibPage(uint8_t updatePage);
 
 /********************************/
 

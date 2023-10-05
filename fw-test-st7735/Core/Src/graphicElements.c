@@ -38,14 +38,15 @@ BTN createButton(uint8_t btnX, uint8_t btnY, const char *text, uint16_t color)
 
 	btn.btnText = text;
 
-	while(*(text++) != 0)
+	while(text[textLen] != 0)
 		textLen++;
 
-	dimW = ( textLen * 11 ) + 5;
-	dimH = ( 18  + 5 );
 
-	fillRoundRect(btnX, btnY, dimW, dimH, 3, color);
-    ST7735_WriteString(btnX, btnY, text, Font_11x18, WHITE, color);
+	dimW = ( textLen * 7 ) + 5;
+	dimH = ( 10  + 5 );
+
+	fillRoundRect(btnX, btnY, dimW, dimH, 2, color);
+	ST7735_WriteString(btnX+3, btnY+3, text, Font_7x10, WHITE, color);
 
     return btn;
 
@@ -72,7 +73,7 @@ void editNumBox(uint8_t textX, uint8_t textY, const char *text, uint8_t num)
 	numToChar[0] = num + 0x30;
 
 	ST7735_WriteString(textX, textY, text, Font_11x18, WHITE, BLACK);
-	drawRoundRect(textX, textY+3, 25, 25, 3, WHITE);
-    ST7735_WriteString(textX+5, textY+8, numToChar, Font_11x18, WHITE, BLACK);
+    ST7735_WriteString(textX+32, textY+22, numToChar, Font_11x18, WHITE, BLACK);
+    drawRoundRect(textX+27, textY+20, 20, 20, 2, WHITE);
 
 }

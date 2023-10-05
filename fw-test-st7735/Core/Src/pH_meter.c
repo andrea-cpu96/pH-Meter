@@ -71,7 +71,8 @@ void pHMeter_process(void)
 
 		case CIRCUIT_CALIBRATION:
 
-			circuitCalibPage(pageChanged);
+			//circuitCalibPage(pageChanged);
+			softwareCalibPage(pageChanged);
 
 			break;
 
@@ -325,7 +326,7 @@ void circuitCalibPage(uint8_t updatePage)
  *  @ the main page. Here it is performed the
  *  @ two points probe calibration
  */
-static void softwareCalibPage(uint8_t updatePage)
+void softwareCalibPage(uint8_t updatePage)
 {
 
 
@@ -429,18 +430,20 @@ static void softwareCalibPage_graphics(void)
 
 	// 2. Timer
 	char sTimer[] = {'3', '0'};
-	ST7735_WriteString(30, 54, "Timer", Font_11x18, WHITE, BLACK);
-	ST7735_WriteString(30, 64, sTimer, Font_11x18, WHITE, BLACK);
+	ST7735_WriteString(5, 35, "TIMER", Font_11x18, WHITE, BLACK);
+	ST7735_WriteString(20, 55, sTimer, Font_11x18, WHITE, BLACK);
+
 
 	// 3. Point number
-	ST7735_WriteString(50, 64, "PT. 1", Font_11x18, WHITE, BLACK);
+	ST7735_WriteString(60, 98, "PT.1", Font_11x18, WHITE, BLACK);
+
 
 	// 4. pH buffer
-	editNumBox(PH_BUFFER_TEXT_POSX, PH_BUFFER_TEXT_POSY, "pH buffer", 7);
+	editNumBox(PH_BUFFER_TEXT_POSX, PH_BUFFER_TEXT_POSY, "pH BUFF", 7);
 
 	// 5. Buttons
-	swCalib_btn[0] = createButton(PH_BUFFER_START_BTN_POSX, PH_BUFFER_START_BTN_POSY, "START", GRAY);
-	swCalib_btn[1] = createButton(PH_BUFFER_STOP_BTN_POSX, PH_BUFFER_STOP_BTN_POSY, "STOP", GRAY);
+	swCalib_btn[0] = createButton(PH_BUFFER_START_BTN_POSX, PH_BUFFER_START_BTN_POSY, "START/STOP", RED);
+	//swCalib_btn[1] = createButton(PH_BUFFER_STOP_BTN_POSX, PH_BUFFER_STOP_BTN_POSY, "STOP", GRAY);
 
 }
 
@@ -460,9 +463,9 @@ static void pageTitle_graphics(const char *title, uint8_t page)
 	if(page == MAIN_PAGE)
 		offset = 0;
 	else if(page == CIRCUIT_CALIBRATION_PAGE)
-		offset = 20;
+		offset = 13;
 	else if(page == SOFTWARE_CALIBRATION_PAGE)
-		offset = 20;
+		offset = 13;
 	else
 		offset = 0;
 
