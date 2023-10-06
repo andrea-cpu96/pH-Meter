@@ -18,6 +18,7 @@
 static uint8_t processStatus_update(void);
 static void pHStatus_update(void);
 
+static uint8_t joysticHandler(ELEMENT *element);
 static void pageTitle_graphics(const char *title, uint8_t page);
 static void mainPage_graphics(void);
 static void circuitCalibPage_graphics(void);
@@ -28,7 +29,12 @@ static void orizzIndicators_graphics(uint16_t color);
 
 uint8_t first = 1;
 
-BTN swCalib_btn[3];
+JOYSTICK_DIR joystick = REST;
+
+ELEMENT *elements;
+
+ELEMENT swCalibElement[SWCALIB_NUM_OF_ELEMENTS];
+uint8_t elementIndex = 0;
 
 uint32_t pHTimeStamp = 0;
 float pH_current = 7.0;
@@ -81,6 +87,8 @@ void pHMeter_process(void)
 
 	if(first == 1)
 		first = 0;
+
+	joysticHandler(elements);
 
 }
 
@@ -352,6 +360,40 @@ void softwareCalibPage(uint8_t updatePage)
 
 /**************** PRIVATE FUNCTIONS ******************/
 
+static uint8_t joysticHandler(ELEMENT *element)
+{
+
+	static uint8_t joystick_old = REST;
+
+
+	if(HAL_GPIO_ReadPin(UP_GPIO_Port, UP_Pin))
+		joystick = UP;
+	else if(HAL_GPIO_ReadPin(DOWN_GPIO_Port, DOWN_Pin))
+		joystick = DOWN;
+	else if(HAL_GPIO_ReadPin(LEFT_GPIO_Port, LEFT_Pin))
+		joystick = LEFT;
+	else if(HAL_GPIO_ReadPin(RIGHT_GPIO_Port, RIGHT))
+		joystick = RIGHT;
+	else if(HAL_GPIO_ReadPin(SEL_GPIO_Port, SEL_Pin))
+		joystick = CENTER;
+	else
+		joystick = REST;
+
+	if(( ( joystick == UP ) || ( joystick == RIGHT ) ) && ( joystick_old == REST ))
+
+	if(( ( joystick == DOWN ) || ( joystick == LEFT ) ) && ( joystick_old == REST ))
+
+	if(( joystick == CENTER ) && ( joystick_old == REST ))
+
+
+	joystick_old = joystick;
+
+
+	// Start element action
+
+}
+
+
 static uint8_t processStatus_update(void)
 {
 
@@ -367,6 +409,16 @@ static uint8_t processStatus_update(void)
 	{
 
 		local_process_status = process_status;
+
+
+		if(process_status == CIRCUIT_CALIBRATION)
+		{
+
+			elements = swCalibElement;
+			elementIndex = 0;
+
+		}
+
 		return 1;
 
 	}
@@ -433,17 +485,14 @@ static void softwareCalibPage_graphics(void)
 	ST7735_WriteString(5, 35, "TIMER", Font_11x18, WHITE, BLACK);
 	ST7735_WriteString(20, 55, sTimer, Font_11x18, WHITE, BLACK);
 
-
 	// 3. Point number
 	ST7735_WriteString(60, 98, "PT.1", Font_11x18, WHITE, BLACK);
 
-
 	// 4. pH buffer
-	editNumBox(PH_BUFFER_TEXT_POSX, PH_BUFFER_TEXT_POSY, "pH BUFF", 7);
+	swCalibElement[0] = createEditNumBox(PH_BUFFER_TEXT_POSX, PH_BUFFER_TEXT_POSY, "pH BUFF", BLACK, 7, BLACK);
 
 	// 5. Buttons
-	swCalib_btn[0] = createButton(PH_BUFFER_START_BTN_POSX, PH_BUFFER_START_BTN_POSY, "START/STOP", RED);
-	//swCalib_btn[1] = createButton(PH_BUFFER_STOP_BTN_POSX, PH_BUFFER_STOP_BTN_POSY, "STOP", GRAY);
+	swCalibElement[1] = createButton(PH_BUFFER_START_BTN_POSX, PH_BUFFER_START_BTN_POSY, "START/STOP", RED);
 
 }
 

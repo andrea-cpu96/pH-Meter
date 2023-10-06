@@ -10,6 +10,14 @@
 
 #include "graphicElements.h"
 
+
+#define NONE									0
+#define SELECT									1
+
+#define PLUS									1
+#define MINUS									-1
+
+
 #define PH_PROCESS_DELAY						1000  // 1 sec
 
 #define STRONG_BASE_THR							10.5
@@ -29,8 +37,6 @@
 #define PH_BUFFER_TEXT_POSY						35
 #define PH_BUFFER_START_BTN_POSX				PH_BUFFER_TEXT_POSX
 #define PH_BUFFER_START_BTN_POSY    			( PH_BUFFER_TEXT_POSY + 45 )
-//#define PH_BUFFER_STOP_BTN_POSX					( PH_BUFFER_START_BTN_POSX + 120 )
-//#define PH_BUFFER_STOP_BTN_POSY    				PH_BUFFER_START_BTN_POSY
 
 typedef enum
 {
@@ -57,7 +63,29 @@ typedef enum
 }PH_STATUS;
 
 
-extern BTN swCalib_btn[3];
+typedef enum
+{
+
+	REST,
+
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	CENTER,
+
+}JOYSTICK_DIR;
+
+
+extern JOYSTICK_DIR joystick;
+
+extern ELEMENT *elements; // It points to the elements of a specific page
+extern uint8_t elementIndex;
+
+#define SWCALIB_NUM_OF_ELEMENTS				3
+extern ELEMENT swCalibElement[SWCALIB_NUM_OF_ELEMENTS];
+
+
 
 /************** pH ***************/
 
