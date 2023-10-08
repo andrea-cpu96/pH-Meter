@@ -64,11 +64,11 @@ void Error_Handler(void);
 #define UP_GPIO_Port GPIOC
 #define DOWN_Pin GPIO_PIN_14
 #define DOWN_GPIO_Port GPIOC
-#define SEL_Pin GPIO_PIN_15
-#define SEL_GPIO_Port GPIOC
-#define LEFT_Pin GPIO_PIN_0
+#define SEL_Pin GPIO_PIN_12        //GPIO_PIN_15
+#define SEL_GPIO_Port GPIOA        //GPIOC
+#define LEFT_Pin GPIO_PIN_11       //GPIO_PIN_0
 #define LEFT_GPIO_Port GPIOA
-#define RIGHT_Pin GPIO_PIN_1
+#define RIGHT_Pin GPIO_PIN_10      //GPIO_PIN_1
 #define RIGHT_GPIO_Port GPIOA
 #define ADC1_IN8_Pin GPIO_PIN_0
 #define ADC1_IN8_GPIO_Port GPIOB

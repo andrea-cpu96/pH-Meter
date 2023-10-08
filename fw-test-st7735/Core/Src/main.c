@@ -267,15 +267,15 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, ST7735_AD_Pin|ST7735_RESET_Pin|ST7735_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : UP_Pin DOWN_Pin SEL_Pin */
-  GPIO_InitStruct.Pin = UP_Pin|DOWN_Pin|SEL_Pin;
+  GPIO_InitStruct.Pin = SEL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LEFT_Pin RIGHT_Pin */
   GPIO_InitStruct.Pin = LEFT_Pin|RIGHT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : ST7735_AD_Pin ST7735_RESET_Pin ST7735_CS_Pin */

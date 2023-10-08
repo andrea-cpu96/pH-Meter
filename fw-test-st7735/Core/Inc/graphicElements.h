@@ -9,8 +9,9 @@
 #define INC_GRAPHICELEMENTS_H_
 
 
-#define BUTTON					0
-#define EDITNUMBOX			    1
+#define NONE					0
+#define BUTTON					1
+#define EDITNUMBOX			    2
 
 
 typedef struct
@@ -19,11 +20,13 @@ typedef struct
 	uint8_t btnX;
 	uint8_t btnY;
 	uint16_t btnColour;
+	uint16_t btnColour2;
 	const char * btnText;
 
-	void *btnAction;
+	void (*btnAction)();
+	uint16_t btnArg;
 
-}BTN;
+}BTN, *pBTN;
 
 typedef struct
 {
@@ -34,8 +37,6 @@ typedef struct
 	const char *boxText;
 	uint8_t boxNum;
 	uint8_t boxColor;
-
-	void *boxAction;
 
 }NBOX;
 
@@ -49,8 +50,16 @@ typedef struct
 
 }ELEMENT;
 
-ELEMENT createButton(uint8_t btnX, uint8_t btnY, const char *text, uint16_t color);
+
+extern uint16_t background;
+
+
+ELEMENT createButton(uint8_t btnX, uint8_t btnY, const char *text, uint16_t bgdColour, uint16_t bgdColour2, void (*btnAction)(), uint16_t arg);
 ELEMENT createEditNumBox(uint8_t textX, uint8_t textY, const char *text, uint16_t bgdTextColor, uint8_t num, uint16_t bgdNumcolor);
 
+void buttonChangeColour(BTN *btn);
+void targetElement(ELEMENT element);
+
+void modifyNumBox(NBOX nBox);
 
 #endif /* INC_GRAPHICELEMENTS_H_ */
