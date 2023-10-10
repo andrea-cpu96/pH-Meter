@@ -12,6 +12,8 @@
 #include "user_sysfunc.h"
 #include "ST7735.h"
 #include "GFX_FUNCTIONS.h"
+#include "v_eeprom.h"
+
 #include "pH_meter.h"
 
 
@@ -50,7 +52,7 @@ uint16_t newPageFlags = MAIN_PROCESS;
 
 uint8_t timerOn = 0;
 
-float twoPointsCalib_pH[2] = {7, 4};
+float twoPointsCalib_pH[2] = {7.0, 4.0};
 float twoPointsCalib_mV[2] = {2.0, 2.6};
 
 
@@ -66,7 +68,14 @@ void pHMeter_process(void)
 	uint8_t pageChanged = 0;
 
 	if(first)
+	{
+
 		idlePage();
+
+		// Read sw calibration parameters from virtual EEPROM
+		readAppDataFromEE();
+
+	}
 
 	// Get a new pH value
 	pH_read();
@@ -449,6 +458,11 @@ void softwareCalibPage(uint8_t updatePage)
 				if(pointIndex >= 2)
 				{
 
+					writeFloatToEE(EE_SWCALIB_PH_PT1, twoPointsCalib_pH[0]);
+					writeFloatToEE(EE_SWCALIB_MV_PT1, twoPointsCalib_mV[0]);
+					writeFloatToEE(EE_SWCALIB_PH_PT2, twoPointsCalib_pH[1]);
+					writeFloatToEE(EE_SWCALIB_MV_PT2, twoPointsCalib_mV[1]);
+
 					pointIndex = 0;
 					newPageFlags = 2;
 
@@ -520,11 +534,27 @@ static void joysticHandler(ELEMENT *element)
 
 		joystick = UP;
 
-		if(( element[elementIndex].elemtentType == EDITNUMBOX ) && ( element[elementIndex].nBox.boxNum < 14 ))
+		if(joystick_old == REST)
 		{
 
-			element[elementIndex].nBox.boxNum++;
-			modifyNumBox(element[elementIndex].nBox);
+			if(( element[elementIndex].elemtentType == EDITNUMBOX ) && ( element[elementIndex].nBox.boxNum < 14 ))
+			{
+
+				element[elementIndex].nBox.boxNum++;
+				modifyNumBox(element[elementIndex].nBox);
+
+			}
+			else
+			{
+
+				elementIndex--;
+
+				if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
+					elementIndex = 0;
+
+				targetElement(element[elementIndex]);
+
+			}
 
 		}
 
@@ -536,11 +566,27 @@ static void joysticHandler(ELEMENT *element)
 
 		joystick = DOWN;
 
-		if(( element[elementIndex].elemtentType == EDITNUMBOX )  && ( element[elementIndex].nBox.boxNum > 0 ))
+		if(joystick_old == REST)
 		{
 
-			element[elementIndex].nBox.boxNum--;
-			modifyNumBox(element[elementIndex].nBox);
+			if(( element[elementIndex].elemtentType == EDITNUMBOX )  && ( element[elementIndex].nBox.boxNum > 0 ))
+			{
+
+				element[elementIndex].nBox.boxNum--;
+				modifyNumBox(element[elementIndex].nBox);
+
+			}
+			else
+			{
+
+				elementIndex++;
+
+				if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
+					elementIndex = ( elementIndexLim - 1 );
+
+				targetElement(element[elementIndex]);
+
+			}
 
 		}
 
@@ -551,6 +597,19 @@ static void joysticHandler(ELEMENT *element)
 	{
 
 		joystick = LEFT;
+
+		if(joystick_old == REST)
+		{
+
+			elementIndex--;
+
+			if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
+				elementIndex = ( elementIndexLim - 1 );
+
+			targetElement(element[elementIndex]);
+
+		}
+
 		HAL_Delay(200);
 
 	}
@@ -558,6 +617,19 @@ static void joysticHandler(ELEMENT *element)
 	{
 
 		joystick = RIGHT;
+
+		if(joystick_old == REST)
+		{
+
+			elementIndex++;
+
+			if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
+				elementIndex = 0;
+
+			targetElement(element[elementIndex]);
+
+		}
+
 		HAL_Delay(200);
 
 	}
@@ -565,6 +637,15 @@ static void joysticHandler(ELEMENT *element)
 	{
 
 		joystick = CENTER;
+
+		if(joystick_old == REST)
+		{
+
+			if(element[elementIndex].elemtentType == BUTTON)
+				element[elementIndex].btn.btnAction(&element[elementIndex].btn);
+
+		}
+
 		HAL_Delay(200);
 
 	}
@@ -572,38 +653,6 @@ static void joysticHandler(ELEMENT *element)
 	{
 
 		joystick = REST;
-
-	}
-
-	if(( joystick == RIGHT ) && ( joystick_old == REST ))
-	{
-
-		elementIndex++;
-
-		if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
-			elementIndex = 0;
-
-		targetElement(element[elementIndex]);
-
-	}
-
-	if(( joystick == LEFT ) && ( joystick_old == REST ))
-	{
-
-		elementIndex--;
-
-		if(( elementIndex >= elementIndexLim ) || ( elementIndex < 0 ))
-			elementIndex = ( elementIndexLim - 1 );
-
-		targetElement(element[elementIndex]);
-
-	}
-
-	if(( joystick == CENTER ) && ( joystick_old == REST ))
-	{
-
-		if(element[elementIndex].elemtentType == BUTTON)
-			element[elementIndex].btn.btnAction(&element[elementIndex].btn);
 
 	}
 
@@ -784,6 +833,7 @@ static void colorBar_graphics(void)
 
 }
 
+
 static void orizzIndicators_graphics(uint16_t color)
 {
 
@@ -799,7 +849,6 @@ static void orizzIndicators_graphics(uint16_t color)
 
 	fillTriangle(0, 128-34, 20, 128-54, 0, 128-74, color);
 	fillTriangle(160, 128-34, 140, 128-54, 160, 128-74, color);
-
 
 }
 

@@ -1,0 +1,10 @@
+../Core/Src/v_eeprom.c:42:6:ee_init	5
+../Core/Src/v_eeprom.c:70:6:readAppDataFromEE	7
+../Core/Src/v_eeprom.c:113:7:readFloatFromEE	5
+../Core/Src/v_eeprom.c:134:9:readByteFromEE	2
+../Core/Src/v_eeprom.c:151:6:writeFloatToEE	1
+../Core/Src/v_eeprom.c:168:22:getByteEe	2
+../Core/Src/v_eeprom.c:179:22:setHalfWorldEe	2
+../Core/Src/v_eeprom.c:191:13:ee_format	3
+../Core/Src/v_eeprom.c:236:13:ee_read	4
+../Core/Src/v_eeprom.c:266:13:ee_write	5

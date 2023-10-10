@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "ST7735.h"
 #include "GFX_FUNCTIONS.h"
+#include "v_eeprom.h"
 #include "pH_meter.h"
 /* USER CODE END Includes */
 
@@ -77,6 +78,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  ee_init();
 
   /* USER CODE END Init */
 
