@@ -15,7 +15,7 @@
 
 
 static EEPROM_STATUS getByteEe(uint32_t eeadr, uint8_t *byte);
-static EEPROM_STATUS setHalfWorldEe(uint32_t eeadr, uint8_t halfW);
+static EEPROM_STATUS setHalfWorldEe(uint32_t eeadr, uint8_t *halfW);
 
 static bool ee_format(bool keepRamData);
 static bool ee_read(uint32_t startVirtualAddress, uint32_t len, uint8_t* data);
@@ -42,27 +42,13 @@ uint8_t ee_ram[_EE_USE_RAM_BYTE]; // RAM buffer
 bool ee_init(void)
 {
 
-  uint8_t dataFlagEeW[2] = {0xAA, 0xAA};
-  UNION4_CONVERSION dataFlagEeR;
+	  readAppDataFromEE();
 
-  dataFlagEeR.un4_uchar[0] = 0;
-  dataFlagEeR.un4_uchar[1] = 0;
+	  // Erase FLASH memory page
+	  if(ee_format(0) == false)
+		  return false;
 
-
-  if(ee_read(EE_FLAG_ADDR, 2, dataFlagEeR.un4_uchar) == false)
-	  return false;
-  else if(dataFlagEeR.un4_uint[0] == _EE_INIZIALIZED)
 	  return true;
-
-  // Erase FLASH memory page
-  if(ee_format(0) == false)
-	  return false;
-
-  // Write a flag to avoid furthers erases of FLASH memory page
-  if(ee_write(EE_FLAG_ADDR, 2, dataFlagEeW) == false)
-	  return false;
-
-  return true;
 
 }
 
@@ -110,6 +96,17 @@ void readAppDataFromEE(void)
 }
 
 
+void writeAppDataToEE(void)
+{
+
+	writeFloatToEE(EE_SWCALIB_PH_PT1, &twoPointsCalib_pH[0]);
+	writeFloatToEE(EE_SWCALIB_MV_PT1, &twoPointsCalib_mV[0]);
+	writeFloatToEE(EE_SWCALIB_PH_PT2, &twoPointsCalib_pH[1]);
+	writeFloatToEE(EE_SWCALIB_MV_PT2, &twoPointsCalib_mV[1]);
+
+}
+
+
 float readFloatFromEE(uint32_t eeadr)
 {
 
@@ -148,15 +145,15 @@ uint8_t readByteFromEE(uint32_t eeadr)
 /*
  * @ NOTE; you can only write HALF-WORLD AT TIME
  */
-void writeFloatToEE(uint32_t eeadr, float fvalue)
+void writeFloatToEE(uint32_t eeadr, float *fvalue)
 {
 
 	UNION4_CONVERSION uconv;
-	uconv.un4_float = fvalue;
+	uconv.un4_float = *fvalue;
 
 
-	setHalfWorldEe(eeadr+0, uconv.un4_uint[0]);
-	setHalfWorldEe(eeadr+2, uconv.un4_uint[2]);
+	setHalfWorldEe(eeadr+0, &uconv.un4_uchar[0]);
+	setHalfWorldEe(eeadr+2, &uconv.un4_uchar[2]);
 
 }
 
@@ -176,10 +173,10 @@ static EEPROM_STATUS getByteEe(uint32_t eeadr, uint8_t *byte)
 }
 
 
-static EEPROM_STATUS setHalfWorldEe(uint32_t eeadr, uint8_t halfW)
+static EEPROM_STATUS setHalfWorldEe(uint32_t eeadr, uint8_t *halfW)
 {
 
-	if(ee_write(eeadr, 2, &halfW) == false)
+	if(ee_write(eeadr, 2, halfW) == false)
 		return EE_INVALID;
 
 	return EE_VALID;
@@ -225,8 +222,6 @@ static bool ee_format(bool keepRamData)
     }
 
   }
-
-  HAL_FLASH_Lock();
 
   return false;
 

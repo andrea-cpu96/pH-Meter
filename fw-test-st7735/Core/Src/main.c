@@ -78,7 +78,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  ee_init();
 
   /* USER CODE END Init */
 
