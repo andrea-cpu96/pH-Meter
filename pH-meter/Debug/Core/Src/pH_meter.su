@@ -1,0 +1,17 @@
+../Core/Src/pH_meter.c:65:6:pHMeter_process	24	static
+../Core/Src/pH_meter.c:131:6:pH_read	40	static
+../Core/Src/pH_meter.c:182:6:idlePage	24	static
+../Core/Src/pH_meter.c:210:6:mainPage	48	static
+../Core/Src/pH_meter.c:317:6:circuitCalibPage	64	static
+../Core/Src/pH_meter.c:390:6:softwareCalibPage	56	static
+../Core/Src/pH_meter.c:503:6:btnSwitchPage	16	static
+../Core/Src/pH_meter.c:512:6:btnStartTimer	16	static
+../Core/Src/pH_meter.c:529:13:joysticHandler	48	static
+../Core/Src/pH_meter.c:667:16:processStatus_update	8	static
+../Core/Src/pH_meter.c:699:13:pHStatus_update	8	static
+../Core/Src/pH_meter.c:716:13:mainPage_graphics	8	static
+../Core/Src/pH_meter.c:732:13:circuitCalibPage_graphics	8	static
+../Core/Src/pH_meter.c:744:13:softwareCalibPage_graphics	80	static
+../Core/Src/pH_meter.c:772:13:pageTitle_graphics	48	static
+../Core/Src/pH_meter.c:804:13:colorBar_graphics	24	static
+../Core/Src/pH_meter.c:840:13:orizzIndicators_graphics	32	static
