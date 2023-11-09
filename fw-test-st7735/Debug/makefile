@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (11.3.rel1)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 -include ../makefile.init
@@ -61,8 +61,8 @@ all:
 main-build: test-st7735.elf secondary-outputs
 
 # Tool invocations
-test-st7735.elf test-st7735.map: $(OBJS) $(USER_OBJS) C:\Users\Fato\Desktop\Nuova\ cartella\pH-Meter\fw-test-st7735\STM32F030CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "test-st7735.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Users\Fato\Desktop\Nuova cartella\pH-Meter\fw-test-st7735\STM32F030CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test-st7735.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+test-st7735.elf test-st7735.map: $(OBJS) $(USER_OBJS) D:\Andrea\Embedded\Repositories\pH-Meter\fw-test-st7735\STM32F030CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "test-st7735.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"D:\Andrea\Embedded\Repositories\pH-Meter\fw-test-st7735\STM32F030CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="test-st7735.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

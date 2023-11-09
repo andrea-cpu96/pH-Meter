@@ -42,10 +42,11 @@ typedef enum
 bool ee_init(void);
 
 void readAppDataFromEE(void);
+void writeAppDataToEE(void);
 
 float readFloatFromEE(uint32_t eeadr);
+void writeFloatToEE(uint32_t eeadr, float *fvalue);
 uint8_t readByteFromEE(uint32_t eeadr);
-void writeFloatToEE(uint32_t eeadr, float fvalue);
 
 
 #endif /* INC_V_EEPROM_H_ */

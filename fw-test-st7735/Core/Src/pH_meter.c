@@ -72,8 +72,12 @@ void pHMeter_process(void)
 
 		idlePage();
 
-		// Read sw calibration parameters from virtual EEPROM
-		readAppDataFromEE();
+		ee_init();
+
+		if(!HAL_GPIO_ReadPin(SEL_GPIO_Port, SEL_Pin))
+			newPageFlags = SW_PROCESS;
+		else
+			writeAppDataToEE();
 
 	}
 
@@ -159,6 +163,9 @@ void pH_read(void)
 		pHValue = ( pHValue / 6.0 );
 
 	}
+
+	if(( pHValue < 0 ) || ( pHValue > 14 ))
+		pHValue = 9.9;
 
 	pH_current = pHValue;
 
@@ -458,13 +465,13 @@ void softwareCalibPage(uint8_t updatePage)
 				if(pointIndex >= 2)
 				{
 
-					writeFloatToEE(EE_SWCALIB_PH_PT1, twoPointsCalib_pH[0]);
-					writeFloatToEE(EE_SWCALIB_MV_PT1, twoPointsCalib_mV[0]);
-					writeFloatToEE(EE_SWCALIB_PH_PT2, twoPointsCalib_pH[1]);
-					writeFloatToEE(EE_SWCALIB_MV_PT2, twoPointsCalib_mV[1]);
+					writeFloatToEE(EE_SWCALIB_PH_PT1, &twoPointsCalib_pH[0]);
+					writeFloatToEE(EE_SWCALIB_MV_PT1, &twoPointsCalib_mV[0]);
+					writeFloatToEE(EE_SWCALIB_PH_PT2, &twoPointsCalib_pH[1]);
+					writeFloatToEE(EE_SWCALIB_MV_PT2, &twoPointsCalib_mV[1]);
 
 					pointIndex = 0;
-					newPageFlags = 2;
+					newPageFlags = MAIN_PROCESS;
 
 				}
 
@@ -721,7 +728,7 @@ static void mainPage_graphics(void)
 
 	// 3. Buttons
 	mainElement[0].elemtentType = NONE;
-	mainElement[1] = createButton(MAIN_TO_SWCALIB_BTN_POSX, MAIN_TO_SWCALIB_BTN_POSY, "CAL", GRAY, BLACK, btnSwitchPage, SW_PROCESS);
+	//mainElement[1] = createButton(MAIN_TO_SWCALIB_BTN_POSX, MAIN_TO_SWCALIB_BTN_POSY, "CAL", GRAY, BLACK, btnSwitchPage, SW_PROCESS);
 
 }
 

@@ -103,7 +103,7 @@ extern uint8_t elementIndexLim;
 #define SWCALIB_NUM_OF_ELEMENTS				4
 extern ELEMENT swCalibElement[SWCALIB_NUM_OF_ELEMENTS];
 
-#define MAIN_NUM_OF_ELEMENTS				2
+#define MAIN_NUM_OF_ELEMENTS				1 //2
 extern ELEMENT mainElement[MAIN_NUM_OF_ELEMENTS];
 
 extern uint16_t newPageFlags;
